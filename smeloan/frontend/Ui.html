@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HDFC UI Clone</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f5f7fa;
+    }
+
+    /* NAVBAR */
+    .navbar {
+        background: #0b4da2;
+        padding: 12px 40px;
+        display: flex;
+        align-items: center;
+        color: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .navbar img {
+        height: 42px;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 30px;
+        margin-left: 40px;
+    }
+
+    .nav-links a {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .right-links {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .search-box {
+        background: white;
+        padding: 8px 15px;
+        border-radius: 6px;
+        width: 260px;
+        border: none;
+        outline: none;
+    }
+
+    .employee-login-btn {
+        color: white;
+        background: #28a745;
+        padding: 8px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+    }
+
+    .employee-login-btn:hover {
+        background: #218838;
+    }
+
+    /* ICON MENU */
+    .icon-menu {
+        display: flex;
+        justify-content: center;
+        background: white;
+        padding: 15px 0;
+        gap: 50px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .icon-menu div {
+        text-align: center;
+        font-size: 12px;
+        font-weight: bold;
+        color: #0b4da2;
+    }
+
+    .icon-menu div img {
+        height: 28px;
+        margin-bottom: 6px;
+    }
+
+    /* MAIN CONTAINER */
+    .container {
+        width: 100%;
+        max-width: 1250px;
+        margin: auto;
+        padding: 30px;
+    }
+
+    .section-title {
+        font-size: 22px;
+        color: #0b4da2;
+        margin-bottom: 25px;
+        font-weight: bold;
+    }
+
+    .card-row {
+        display: flex;
+        gap: 25px;
+    }
+
+    /* CARD DESIGN - PERFECT EQUAL BOXES */
+    .card {
+        flex: 1;
+        height: 220px;
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #eee;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        text-align: center;
+        box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+        transition: 0.25s;
+        cursor: pointer;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 6px 16px rgba(0,0,0,0.18);
+    }
+
+    .card img {
+        height: 55px;
+        margin-bottom: 12px;
+    }
+
+    .card h3 {
+        color: #0b4da2;
+        margin-bottom: 6px;
+        font-size: 17px;
+    }
+
+    .card p {
+        font-size: 13px;
+        color: #333;
+    }
+
+    a.card-link {
+        text-decoration: none;
+        color: inherit;
+        flex: 1;
+    }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    
+<img src="logo/HDB.png" alt="HDFC logo" height="42">
+
+    <div class="nav-links">
+        <a href="#">Personal</a>
+        <a href="#">NRI</a>
+        <a href="#">SME</a>
+        <a href="#">Wholesale</a>
+        <a href="#">Agri</a>
+    </div>
+
+    <div class="right-links">
+        <input type="text" class="search-box" placeholder="Search...">
+        <a href="employee-login.html" class="employee-login-btn">Employee Login</a>
+        <img src="logo/HDB_BIG.png" alt="HDB Big Logo" height="42">
+    </div>
+</div>
+
+<!-- ICON MENU -->
+<div class="icon-menu">
+    <div><img src="https://cdn-icons-png.flaticon.com/512/1946/1946488.png">HOME</div>
+    <div><img src="https://cdn-icons-png.flaticon.com/512/929/929422.png">PAY</div>
+    <div><img src="https://cdn-icons-png.flaticon.com/512/1828/1828925.png">SAVE</div>
+    <div><img src="https://cdn-icons-png.flaticon.com/512/2011/2011155.png">INVEST</div>
+    <div><img src="https://cdn-icons-png.flaticon.com/512/2746/2746038.png">BORROW</div>
+    <div><img src="https://cdn-icons-png.flaticon.com/128/2913/2913185.png">INSURE</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+
+    <h2 class="section-title">Instant Customer Services</h2>
+
+    <div class="card-row">
+
+        <div class="card">
+            <img src="https://cdn-icons-png.flaticon.com/512/1161/1161388.png">
+            <h3>Debit Card Instant Pin</h3>
+            <p>Set Debit Card PIN instantly</p>
+        </div>
+
+        <div class="card">
+            <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png">
+            <h3>Address Change</h3>
+            <p>Update mailing or permanent address</p>
+        </div>
+
+        <div class="card">
+            <img src="https://cdn-icons-png.flaticon.com/512/747/747376.png">
+            <h3>Account Transfer</h3>
+            <p>Transfer account to another branch</p>
+        </div>
+
+        <!-- UPDATED: CHECK SME LOAN APPLICATION -->
+        <a href="update-kyc.html" class="card-link">
+            <div class="card">
+                <img src="https://cdn-icons-png.flaticon.com/512/3050/3050525.png">
+                <h3>Check SME Loan Application</h3>
+                <p>Track and verify your SME loan status</p>
+            </div>
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

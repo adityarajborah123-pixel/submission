@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Income Document Submission</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #eef2f7;
+    }
+
+    .top-bar {
+        background: #0b4da2;
+        color: white;
+        padding: 14px 30px;
+        font-size: 20px;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    .container {
+        width: 560px;
+        max-width: 96%;
+        margin: 40px auto;
+        background: white;
+        padding: 28px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        animation: fadeIn 0.35s ease;
+    }
+
+    @keyframes fadeIn {
+        from {opacity:0; transform: translateY(8px);}
+        to   {opacity:1; transform: translateY(0);}
+    }
+
+    h2 {
+        margin-top: 0;
+        color: #0b4da2;
+        font-size: 22px;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .subtext {
+        text-align: center;
+        font-size: 13px;
+        color: #555;
+        margin-bottom: 18px;
+    }
+
+    label {
+        display: block;
+        margin: 12px 0 6px;
+        font-weight: 600;
+        font-size: 13px;
+        color: #0b4da2;
+    }
+
+    input[type="text"], input[type="file"] {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        background: #fafafa;
+        box-sizing: border-box;
+    }
+
+    input[readonly] {
+        background: #efefef;
+        cursor: not-allowed;
+    }
+
+    .file-box {
+        padding: 10px;
+        background: #fafafa;
+        border: 1px dashed #0b4da2;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .hint {
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        margin-top: 18px;
+        background: #0b4da2;
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    button:hover { background: #093a79; }
+
+    #msg {
+        margin-top: 12px;
+        font-weight: 600;
+        text-align: center;
+        color: #d32f2f;
+        min-height: 20px;
+    }
+</style>
+</head>
+
+<body>
+
+<div id="appHeader" style="background:#f3f6fb;padding:12px;border-bottom:1px solid #e1e8f0;font-weight:600;">
+  Loading applicant...
+</div>
+
+<div class="container">
+    <h2>Income Document</h2>
+    <p class="subtext">Upload required income documents to proceed with your SME loan application. All uploads should be PDFs or images.</p>
+
+    <div id="msg"></div>
+
+    <form id="form" style="display:none" autocomplete="off" enctype="multipart/form-data">
+      <input type="hidden" name="applicantId" id="appId" value="">
+      <input type="hidden" name="section" value="income">
+
+      <h3>Profit & Loss Statements (3 years)</h3>
+      <input type="file" id="pl_yr1" name="pl_yr1" accept=".pdf,image/*">
+      <input type="file" id="pl_yr2" name="pl_yr2" accept=".pdf,image/*">
+      <input type="file" id="pl_yr3" name="pl_yr3" accept=".pdf,image/*">
+
+      <h3>Balance Sheets (3 years)</h3>
+      <input type="file" id="bs_yr1" name="bs_yr1" accept=".pdf,image/*">
+      <input type="file" id="bs_yr2" name="bs_yr2" accept=".pdf,image/*">
+      <input type="file" id="bs_yr3" name="bs_yr3" accept=".pdf,image/*">
+
+      <h3>Income Tax Returns (3 years)</h3>
+      <input type="file" id="itr_yr1" name="itr_yr1" accept=".pdf,image/*">
+      <input type="file" id="itr_yr2" name="itr_yr2" accept=".pdf,image/*">
+      <input type="file" id="itr_yr3" name="itr_yr3" accept=".pdf,image/*">
+
+      <h3>Bank Statements (last 6-12 months)</h3>
+      <input type="file" id="bank_statements" name="bank_statements" accept=".pdf,image/*" multiple>
+
+      <div class="hint">Use PDF or images. Upload one file per required year field. Bank statements can be multiple files.</div>
+
+      <button type="submit">Submit Income Documents</button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const header = document.getElementById('appHeader');
+  const idInput = document.getElementById('appId');
+  const id = new URLSearchParams(window.location.search).get('id') || localStorage.getItem('applicantId') || '';
+
+  if (header) header.textContent = id ? 'Applicant ID: ' + id : 'Applicant ID: (missing)';
+  if (idInput && id) idInput.value = id;
+  if (!id) return;
+
+  try {
+    const res = await fetch('/api/applicants/' + encodeURIComponent(id));
+    if (res.ok) {
+      const data = await res.json();
+      const name = data['Applicant Name'] || data.name || data['Business Name'] || '';
+      if (name && header) header.textContent = `Applicant ID: ${id} — ${name}`;
+    }
+  } catch (e) { /* ignore */ }
+});
+
+(async function(){
+  const msgEl = document.getElementById('msg');
+  const form = document.getElementById('form');
+  const idInput = document.getElementById('appId');
+
+  const applicantId = new URLSearchParams(window.location.search).get('id') || localStorage.getItem('applicantId') || '';
+  if (!applicantId) {
+    msgEl.textContent = 'Applicant ID missing in URL or localStorage';
+    return;
+  }
+  idInput.value = applicantId;
+  form.style.display = '';
+
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const id = idInput.value.trim();
+    if (!id) { alert('Applicant ID required'); return; }
+
+    const fd = new FormData(form);
+    try {
+      const res = await fetch('/api/applicants/' + encodeURIComponent(id) + '/submit-doc', {
+        method: 'POST',
+        body: fd
+      });
+      if (!res.ok) throw new Error('Upload failed: ' + res.status);
+      localStorage.setItem('applicantId', id);
+      // after income submission go to KYC
+      window.location.href = 'kyc-submit.html?id=' + encodeURIComponent(id);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to upload income documents. Check console/server logs.');
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

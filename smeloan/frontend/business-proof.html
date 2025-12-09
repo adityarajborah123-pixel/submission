@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Business Proof Submission</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #eef2f7;
+    }
+
+    .top-bar {
+        background: #0b4da2;
+        color: white;
+        padding: 14px 30px;
+        font-size: 20px;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    .container {
+        width: 500px;
+        margin: 50px auto;
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+        from {opacity:0; transform: translateY(10px);}
+        to   {opacity:1; transform: translateY(0);}
+    }
+
+    h2 {
+        margin-top: 0;
+        color: #0b4da2;
+        font-size: 26px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .subtext {
+        text-align: center;
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        margin: 15px 0 6px;
+        font-weight: bold;
+        font-size: 14px;
+        color: #0b4da2;
+    }
+
+    input[type="text"], input[type="file"] {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 15px;
+        background: #fafafa;
+    }
+
+    input[readonly] {
+        background: #e6e6e6;
+        cursor: not-allowed;
+    }
+
+    .file-box {
+        padding: 12px;
+        background: #fafafa;
+        border: 1px dashed #0b4da2;
+        border-radius: 10px;
+        cursor: pointer;
+        text-align: center;
+        transition: 0.2s;
+    }
+
+    .file-box:hover {
+        background: #eaf2ff;
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+        margin-top: 20px;
+        background: #0b4da2;
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    button:hover {
+        background: #093a79;
+        transform: translateY(-2px);
+    }
+
+    #msg {
+        margin-top: 10px;
+        font-weight: bold;
+        text-align: center;
+        color: #d32f2f;
+        min-height: 20px;
+    }
+</style>
+</head>
+
+<body>
+
+<div id="appHeader" style="background:#f3f6fb;padding:12px;border-bottom:1px solid #e1e8f0;font-weight:600;">
+  Loading applicant...
+</div>
+
+<div class="top-bar">Business Proof Upload</div>
+
+<div class="container">
+
+    <h2>Business Proof Submission</h2>
+    <p class="subtext">Upload your business proof and related documents.</p>
+
+    <div id="msg"></div>
+
+    <form id="form" enctype="multipart/form-data">
+  <input type="hidden" name="applicantId" id="bpAppId" value="">
+  <input type="hidden" name="section" value="business">
+
+  <label>Government Registration Document</label>
+  <input type="file" name="reg_doc" accept=".pdf,image/*">
+
+  <label>Corporate Identification Number (CIN) Document (if applicable)</label>
+  <input type="file" name="cin_doc" accept=".pdf,image/*">
+
+  <label>List of Board of Directors (for Pvt Ltd)</label>
+  <input type="file" name="board_list" accept=".pdf,image/*">
+
+  <button type="submit">Submit Business Proof</button>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const id = new URLSearchParams(location.search).get('id') || localStorage.getItem('applicantId') || '';
+  if (id) document.getElementById('bpAppId').value = id;
+  document.getElementById('form').addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const fd = new FormData(ev.target);
+    const res = await fetch('/api/applicants/' + encodeURIComponent(id) + '/submit-doc', { method:'POST', body: fd });
+    if (res.ok) { localStorage.setItem('applicantId', id); location.href = 'success.html?id=' + encodeURIComponent(id); } else alert('Upload failed');
+  });
+});
+</script>
+</div>
+
+<script>
+(async function(){
+  const form = document.getElementById('form');
+  const id = new URLSearchParams(window.location.search).get('id') || localStorage.getItem('applicantId') || '';
+  if (!id) { alert('Applicant ID required'); return; }
+  document.getElementById('bpAppId').value = id;
+
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+
+    if (!validateFiles()) {
+      return; // Stop submission if validation fails
+    }
+
+    const fd = new FormData(form);
+    try {
+      const res = await fetch('/api/applicants/' + encodeURIComponent(id) + '/submit-doc', {
+        method: 'POST',
+        body: fd
+      });
+      if (!res.ok) throw new Error('Save failed');
+      localStorage.setItem('applicantId', id);
+      window.location.href = 'success.html?id=' + encodeURIComponent(id);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save business proof. Check server logs.');
+    }
+  });
+})();
+
+// Validate file uploads
+function validateFiles() {
+  const fileInputs = document.querySelectorAll('input[type="file"]');
+  const maxSize = 5 * 1024 * 1024; // 5 MB in bytes
+  let isValid = true;
+  let errorMessage = '';
+
+  fileInputs.forEach(input => {
+    if (input.files.length > 0) {
+      for (let file of input.files) {
+        // Check file type
+        if (file.type !== 'application/pdf') {
+          isValid = false;
+          errorMessage += `${file.name} must be a PDF file.\n`;
+        }
+        // Check file size
+        if (file.size > maxSize) {
+          isValid = false;
+          errorMessage += `${file.name} exceeds 5 MB limit.\n`;
+        }
+      }
+    }
+  });
+
+  if (!isValid) {
+    alert('Validation Error:\n' + errorMessage);
+  }
+
+  return isValid;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SME Applicant Login</title>
+
+<style>
+    body {
+        margin:0;
+        padding:40px;
+        background:#eef3f9;
+        font-family:'Segoe UI', Arial;
+    }
+
+    /* MAIN CARD */
+    .box {
+        width:45%;
+        margin:auto;
+        background:white;
+        padding:35px;
+        border-radius:18px;
+        box-shadow:0 10px 25px rgba(0,0,0,0.1);
+    }
+
+    /* HEADER */
+    h2 {
+        text-align:center;
+        color:#0b4da2;
+        margin-bottom:25px;
+        font-size:28px;
+    }
+
+    /* TABS */
+    .tabs {
+        display:flex;
+        justify-content:center;
+        margin-bottom:20px;
+        border-bottom:2px solid #e6e6e6;
+    }
+
+    .tab {
+        padding:12px 30px;
+        font-size:17px;
+        font-weight:600;
+        color:#666;
+        cursor:pointer;
+        border-bottom:3px solid transparent;
+        transition:0.2s;
+    }
+    .tab.active {
+        color:#0b4da2;
+        border-bottom:3px solid #0b4da2;
+    }
+
+    /* INPUT */
+    label {
+        margin-top:15px;
+        font-weight:600;
+        color:#0b3b7c;
+        display:block;
+    }
+
+    input, select {
+        width:100%;
+        padding:12px;
+        margin-top:6px;
+        border-radius:10px;
+        border:1px solid #ccc;
+        background:#f8faff;
+        font-size:15px;
+    }
+
+    input:focus, select:focus {
+        border-color:#0b4da2;
+        background:white;
+    }
+
+    /* OTP with Verify Button */
+    .otp-row {
+        display:flex;
+        gap:10px;
+        align-items:center;
+    }
+    .verify-btn {
+        padding:12px 16px;
+        background:#0b4da2;
+        color:white;
+        border:none;
+        border-radius:8px;
+        font-size:14px;
+        font-weight:600;
+        cursor:pointer;
+    }
+
+    .verify-btn:hover { background:#093b7c; }
+
+    /* BUTTON */
+    .main-btn {
+        width:100%;
+        padding:14px;
+        margin-top:20px;
+        background:#0b4da2;
+        color:white;
+        border:none;
+        border-radius:12px;
+        font-size:17px;
+        font-weight:700;
+        cursor:pointer;
+        transition:0.2s;
+    }
+    .main-btn:hover {
+        background:#093b7c;
+        transform:translateY(-2px);
+    }
+
+    /* HIDE CONTENT */
+    .tab-content {
+        display:none;
+    }
+    .tab-content.active {
+        display:block;
+    }
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+    <h2>SME Applicant Portal</h2>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <div class="tab active" id="tab-existing">Existing Applicant</div>
+        <div class="tab" id="tab-new">New Applicant</div>
+    </div>
+
+    <!-- EXISTING APPLICANT (SHOWN BY DEFAULT) -->
+    <div class="tab-content active" id="existingBox">
+
+        <label>Applicant Loan ID</label>
+        <input id="applicantID" type="text" placeholder="Enter Applicant ID">
+
+        <label>Registered Mobile Number</label>
+        <input id="mobileNumber" type="text" value="**********" readonly>
+
+        <label>OTP</label>
+        <input id="otp" type="text" value="******" readonly>
+
+        <button class="main-btn" id="proceedExisting">Check Application →</button>
+    </div>
+
+    <!-- NEW APPLICANT SECTION -->
+    <div class="tab-content" id="newBox">
+
+        <label>Company Name</label>
+        <input id="companyName" type="text" placeholder="Enter Company Name">
+
+        <label>Loan Category (E3 Classification)</label>
+        <select id="loanCategory">
+            <option value="" disabled selected>Select Loan Category</option>
+            <option value="Micro">Micro - Turnover ≤ 2.5 Cr, Investment ≤ 10 Cr</option>
+            <option value="Small">Small - Turnover ≤ 25 Cr, Investment ≤ 100 Cr</option>
+            <option value="Medium">Medium - Turnover ≤ 125 Cr, Investment ≤ 500 Cr</option>
+        </select>
+
+        <label>Loan Amount</label>
+        <input id="loanAmount" type="number" placeholder="Enter Amount">
+
+        <label>Business Type</label>
+        <select id="businessType">
+            <option value="" disabled selected>Select Business Type</option>
+            <option>Trading</option>
+            <option>Manufacturing</option>
+            <option>Services</option>
+            <option>MSME</option>
+        </select>
+
+        <label>Phone Number</label>
+        <input id="newPhone" type="text" placeholder="Enter Phone Number">
+
+        <label>OTP</label>
+        <div class="otp-row">
+            <input id="newOtp" type="text" placeholder="Enter OTP">
+            <button type="button" class="verify-btn" id="verifyOtpBtn">Verify</button>
+        </div>
+
+        <button class="main-btn" id="proceedNew">Start Application →</button>
+    </div>
+
+</div>
+
+<script>
+/* ============= TAB SWITCHING FIXED ============= */
+
+document.getElementById("tab-existing").onclick = function () {
+    switchTab(true);
+};
+document.getElementById("tab-new").onclick = function () {
+    switchTab(false);
+};
+
+function switchTab(showExisting) {
+    document.getElementById("tab-existing").classList.toggle("active", showExisting);
+    document.getElementById("tab-new").classList.toggle("active", !showExisting);
+
+    document.getElementById("existingBox").classList.toggle("active", showExisting);
+    document.getElementById("newBox").classList.toggle("active", !showExisting);
+}
+
+/* ============= EXISTING APPLICANT FLOW ============= */
+document.getElementById("proceedExisting").onclick = function () {
+    const id = document.getElementById("applicantID").value.trim();
+
+    if (!id) {
+        alert("Please enter Applicant ID");
+        return;
+    }
+
+    fetch('/api/applicants/' + encodeURIComponent(id))
+        .then(res => res.json())
+        .then(data => {
+            if (!data || data.status === "NOT_FOUND") {
+                alert("Applicant Not Found!");
+                return;
+            }
+            sessionStorage.setItem("applicantData", JSON.stringify(data));
+            window.location.href = "final-details.html?id=" + encodeURIComponent(id);
+        })
+        .catch(err => alert("Server Error"));
+};
+
+/* ============= NEW APPLICANT OTP FLOW ============= */
+let generatedOtp = null;
+let otpTimestamp = null;
+
+document.getElementById("newPhone").addEventListener("input", function () {
+    const num = this.value.trim();
+
+    if (num.length === 10) {
+        generatedOtp = Math.floor(100000 + Math.random() * 900000);
+        otpTimestamp = Date.now();
+        alert("Your OTP is: " + generatedOtp + " (valid for 5 minutes)");
+    }
+});
+
+document.getElementById("verifyOtpBtn").onclick = function () {
+    const otp = document.getElementById("newOtp").value.trim();
+
+    if (!generatedOtp || !otpTimestamp) {
+        alert("Enter phone number first.");
+        return;
+    }
+
+    const now = Date.now();
+    const diff = (now - otpTimestamp) / 1000 / 60; // minutes
+    if (diff > 5) {
+        alert("OTP expired. Please request a new one.");
+        generatedOtp = null;
+        otpTimestamp = null;
+        return;
+    }
+
+    if (otp == generatedOtp) {
+        alert("OTP Verified!");
+        document.getElementById("newOtp").style.border = "2px solid #28a745";
+    } else {
+        alert("Incorrect OTP!");
+    }
+};
+
+document.getElementById("proceedNew").onclick = function () {
+    const name = document.getElementById("companyName").value.trim();
+    const category = document.getElementById("loanCategory").value;
+    const amount = document.getElementById("loanAmount").value.trim();
+    const type = document.getElementById("businessType").value;
+    const phone = document.getElementById("newPhone").value.trim();
+    const otp = document.getElementById("newOtp").value.trim();
+
+    if (!name || !category || !amount || !type || !phone || !otp) {
+        alert("Please fill all fields");
+        return;
+    }
+
+    if (!generatedOtp || !otpTimestamp) {
+        alert("Please generate OTP first.");
+        return;
+    }
+
+    const now = Date.now();
+    const diff = (now - otpTimestamp) / 1000 / 60; // minutes
+    if (diff > 5) {
+        alert("OTP expired. Please request a new one.");
+        generatedOtp = null;
+        otpTimestamp = null;
+        return;
+    }
+
+    if (otp != generatedOtp) {
+        alert("OTP not verified");
+        return;
+    }
+
+    // Validate for duplicates before proceeding
+    fetch('/api/applicants/validate-new', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyName: name, phoneNumber: phone })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert("Error creating applicant: " + data.error);
+            return;
+        }
+        // Proceed to new application page
+        window.location.href =
+            "new-application.html?name=" + encodeURIComponent(name) +
+            "&amount=" + encodeURIComponent(amount) +
+            "&type=" + encodeURIComponent(type) +
+            "&phone=" + encodeURIComponent(phone) +
+            "&category=" + encodeURIComponent(category);
+    })
+    .catch(err => alert("Server Error"));
+};
+</script>
+
+</body>
+</html>

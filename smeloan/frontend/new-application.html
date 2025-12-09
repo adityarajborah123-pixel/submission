@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Application - SME Loan</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: #eef3f9;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        .box {
+            width: 70%;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #0b4da2;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+
+        .info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8faff;
+            border-radius: 10px;
+            border-left: 4px solid #0b4da2;
+        }
+
+        .info p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+        .checklist {
+            margin-top: 30px;
+        }
+
+        .checklist h3 {
+            color: #0b4da2;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .checklist-item {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .checklist-item label {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .checklist-item input[type="file"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            background: #0b4da2;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #093b7c;
+            transform: translateY(-2px);
+        }
+
+        .back-btn {
+            background: #6c757d;
+            margin-top: 10px;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>New Application Started</h2>
+        <div class="info">
+            <p><strong>Company Name:</strong> <span id="companyName"></span></p>
+            <p><strong>Loan Category:</strong> <span id="loanCategory"></span></p>
+            <p><strong>Loan Amount:</strong> <span id="loanAmount"></span></p>
+            <p><strong>Business Type:</strong> <span id="businessType"></span></p>
+            <p><strong>Phone Number:</strong> <span id="phoneNumber"></span></p>
+        </div>
+
+        <form id="newApplicantForm" method="POST" enctype="multipart/form-data">
+            <input type="hidden" id="applicantIdInput" name="applicantId">
+
+            <div class="checklist">
+                <h3>KYC Checklist for SME Loans</h3>
+
+                <h4>Income Proof</h4>
+                <div class="checklist-item">
+                    <label for="pl_yr1">1. Profit and Loss Statement for 3 consecutive Financial Years</label>
+                    <input type="file" id="pl_yr1" name="pl_yr1" accept=".pdf">
+                </div>
+                <div class="checklist-item">
+                    <label for="bs_yr1">2. Balance Sheet for 3 consecutive Financial Years</label>
+                    <input type="file" id="bs_yr1" name="bs_yr1" accept=".pdf">
+                </div>
+                <div class="checklist-item">
+                    <label for="itr_yr1">3. Income Tax Return for 3 consecutive Financial Years</label>
+                    <input type="file" id="itr_yr1" name="itr_yr1" accept=".pdf">
+                </div>
+                <div class="checklist-item">
+                    <label for="bank_statements">4. Bank Statement related to the business (Last 6 months – 12 months)</label>
+                    <input type="file" id="bank_statements" name="bank_statements" accept=".pdf">
+                </div>
+
+                <h4>KYC Documents</h4>
+                <div class="checklist-item">
+                    <label for="pan_business">5. PAN Card of the Business</label>
+                    <input type="file" id="pan_business" name="pan_business" accept=".pdf">
+                </div>
+                <div class="checklist-item">
+                    <label for="pan_owner">6. PAN Card of the Business Owners</label>
+                    <input type="file" id="pan_owner" name="pan_owner" accept=".pdf">
+                </div>
+                <div class="checklist-item">
+                    <label for="aadhar_owner">7. Aadhar Card of the Business Owners</label>
+                    <input type="file" id="aadhar_owner" name="aadhar_owner" accept=".pdf">
+                </div>
+                <div class="checklist-item">
+                    <label for="address_proof">8. Address Proof of the Business Office</label>
+                    <input type="file" id="address_proof" name="address_proof" accept=".pdf">
+                </div>
+
+                <h4>Business Proof</h4>
+                <div class="checklist-item">
+                    <label for="reg_doc">9. Government issued Business Proof Document – Registration Document</label>
+                    <input type="file" id="reg_doc" name="reg_doc" accept=".pdf">
+                </div>
+                <div class="checklist-item">
+                    <label for="cin_doc">10. Corporate Identification Number, if applicable</label>
+                    <input type="file" id="cin_doc" name="cin_doc" accept=".pdf">
+                </div>
+                <div class="checklist-item">
+                    <label for="board_list">11. List of Board of Directors (for Pvt Ltd businesses)</label>
+                    <input type="file" id="board_list" name="board_list" accept=".pdf">
+                </div>
+            </div>
+
+            <button type="submit" class="btn" id="submitChecklist">Submit Documents & Proceed</button>
+            <button type="button" class="btn back-btn" onclick="window.location.href='applicant-login.html'">Back to Login</button>
+        </form>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const companyName = urlParams.get('name') || 'N/A';
+        const loanAmount = urlParams.get('amount') || 'N/A';
+        const businessType = urlParams.get('type') || 'N/A';
+        const phoneNumber = urlParams.get('phone') || 'N/A';
+        const loanCategory = urlParams.get('category') || 'N/A';
+
+        document.getElementById('companyName').textContent = companyName;
+        document.getElementById('loanAmount').textContent = loanAmount;
+        document.getElementById('businessType').textContent = businessType;
+        document.getElementById('phoneNumber').textContent = phoneNumber;
+
+        // Create new applicant when page loads
+        async function createApplicant() {
+            try {
+                const response = await fetch('http://localhost:5000/api/applicants/create-new', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        companyName: companyName,
+                        loanCategory: loanCategory,
+                        businessType: businessType,
+                        phoneNumber: phoneNumber,
+                        loanAmount: loanAmount
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.applicantId) {
+                    document.getElementById('applicantIdInput').value = data.applicantId;
+                    console.log('Applicant created:', data.applicantId);
+                    alert(`Your application ID ${data.applicantId} has been sent to your phone number ${phoneNumber}`);
+                } else {
+                    const msg = data.message || data.error || 'Unknown error';
+                    if (msg.toLowerCase().includes('success')) {
+                        alert(msg);
+                    } else {
+                        alert('Error creating applicant: ' + msg);
+                    }
+                }
+            } catch (error) {
+                console.error('Error creating applicant:', error);
+                alert('Error creating applicant. Please try again.');
+            }
+        }
+
+        // Create applicant on page load
+        createApplicant();
+
+        // Validate file uploads
+        function validateFiles() {
+            const fileInputs = document.querySelectorAll('input[type="file"]');
+            const maxSize = 5 * 1024 * 1024; // 5 MB in bytes
+            let isValid = true;
+            let errorMessage = '';
+
+            fileInputs.forEach(input => {
+                if (input.files.length > 0) {
+                    for (let file of input.files) {
+                        // Check file type
+                        if (file.type !== 'application/pdf') {
+                            isValid = false;
+                            errorMessage += `${file.name} must be a PDF file.\n`;
+                        }
+                        // Check file size
+                        if (file.size > maxSize) {
+                            isValid = false;
+                            errorMessage += `${file.name} exceeds 5 MB limit.\n`;
+                        }
+                    }
+                }
+            });
+
+            if (!isValid) {
+                alert('Validation Error:\n' + errorMessage);
+            }
+
+            return isValid;
+        }
+
+        // Handle form submission
+        document.getElementById('newApplicantForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            if (!validateFiles()) {
+                return; // Stop submission if validation fails
+            }
+
+            const formData = new FormData(this);
+
+            try {
+                const applicantId = document.getElementById('applicantIdInput').value;
+                const response = await fetch(`http://localhost:5000/api/applicants/update-documents/${encodeURIComponent(applicantId)}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Documents submitted successfully!');
+                    window.location.href = 'success.html';
+                } else {
+                    alert('Error submitting documents: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error submitting documents. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

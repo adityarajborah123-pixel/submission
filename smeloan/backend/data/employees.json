@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "username": "admin",
+    "password": "password"
+  },
+  {
+    "id": 2,
+    "username": "john.doe",
+    "password": "john123"
+  },
+  {
+    "id": 3,
+    "username": "jane.smith",
+    "password": "jane456"
+  },
+  {
+    "id": 4,
+    "username": "mike.johnson",
+    "password": "mike789"
+  },
+  {
+    "id": 5,
+    "username": "sarah.wilson",
+    "password": "sarah101"
+  },
+  {
+    "id": 6,
+    "username": "david.brown",
+    "password": "david202"
+  },
+  {
+    "id": 7,
+    "username": "lisa.davis",
+    "password": "lisa303"
+  },
+  {
+    "id": 8,
+    "username": "robert.miller",
+    "password": "robert404"
+  },
+  {
+    "id": 9,
+    "username": "emily.garcia",
+    "password": "emily505"
+  },
+  {
+    "id": 10,
+    "username": "chris.anderson",
+    "password": "chris606"
+  }
+]

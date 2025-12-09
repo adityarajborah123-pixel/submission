@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Login - SME Loan</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: #eef3f9;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        .box {
+            width: 45%;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #0b4da2;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+
+        label {
+            margin-top: 15px;
+            font-weight: 600;
+            color: #0b3b7c;
+            display: block;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            background: #f8faff;
+            font-size: 15px;
+        }
+
+        input:focus {
+            border-color: #0b4da2;
+            background: white;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            background: #0b4da2;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #093b7c;
+            transform: translateY(-2px);
+        }
+
+        .back-btn {
+            background: #6c757d;
+            margin-top: 10px;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Employee Login</h2>
+        <form id="employeeLoginForm">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Enter Username" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter Password" required>
+
+            <button type="submit" class="btn">Login</button>
+            <button type="button" class="btn back-btn" onclick="window.location.href='Ui.html'">Back to Home</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('employeeLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!username || !password) {
+                alert('Please enter both username and password');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/applicants/employee/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'SUCCESS') {
+                    alert('Login successful! Welcome ' + data.employee.username);
+                    // Store employee info in localStorage for session management
+                    localStorage.setItem('employee', JSON.stringify(data.employee));
+                    // Redirect to employee dashboard
+                    window.location.href = 'employee-dashboard.html';
+                } else {
+                    alert(data.message || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('An error occurred during login. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

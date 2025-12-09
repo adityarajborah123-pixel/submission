@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SME Loan Dashboard</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<style>
+/* ---------- GLOBAL ---------- */
+body{
+    margin:0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background:#f3f6fb;
+}
+
+/* ---------- TOP NAV ---------- */
+.topbar{
+    background:#0b4da2;
+    padding:16px 30px;
+    color:#fff;
+    font-size:22px;
+    font-weight:600;
+    letter-spacing:0.5px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    box-shadow:0 2px 10px rgba(0,0,0,0.15);
+}
+
+.topbar span{
+    font-size:15px;
+    opacity:0.8;
+}
+
+/* ---------- MAIN CARD ---------- */
+.dashboard{
+    max-width:950px;
+    margin:35px auto;
+    background:#fff;
+    border-radius:18px;
+    padding:32px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+h2{
+    margin:0 0 8px;
+    font-size:26px;
+    color:#0b4da2;
+}
+
+.sub{
+    margin-bottom:20px;
+    color:#555;
+    font-size:14px;
+}
+
+/* ---------- TABLE ---------- */
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+td{
+    padding:12px;
+    border-bottom:1px solid #f1f1f1;
+    font-size:15px;
+}
+
+td.label{
+    width:35%;
+    font-weight:600;
+    background:#f8faff;
+    color:#0a3875;
+    border-right:1px solid #e7e7e7;
+}
+
+/* ---------- STATUS BADGE ---------- */
+.badge{
+    padding:6px 14px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:600;
+}
+.badge.yes { background:#d1f5d3; color:#0a7a15; }
+.badge.no { background:#ffe5e5; color:#d12222; }
+
+/* ---------- ACTIONS ---------- */
+.actions{
+    margin-top:25px;
+    display:flex;
+    justify-content:right;
+    gap:12px;
+}
+
+.btn{
+    padding:12px 20px;
+    font-size:15px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    background:#fff;
+    cursor:pointer;
+}
+.btn.primary{
+    background:#0b4da2;
+    border-color:#0b4da2;
+    color:#fff;
+    font-weight:600;
+}
+.btn:hover{
+    opacity:0.9;
+}
+
+/* ---------- ERROR ---------- */
+.error{
+    color:#b00020;
+    background:#ffecec;
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:10px;
+    display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+    SME Loan Dashboard
+    <span id="topApplicant"></span>
+</div>
+
+<div class="dashboard">
+    <h2>Final Applicant Summary</h2>
+    <p class="sub">Review your application details and continue with remaining document submissions.</p>
+
+    <div id="error" class="error"></div>
+
+    <table id="details" style="display:none"></table>
+
+    <div class="actions">
+        <button class="btn" id="backBtn">Back</button>
+        <button class="btn primary" id="proceedBtn" style="display:none">Proceed →</button>
+    </div>
+</div>
+
+<script>
+/* ============================================================================
+   This version keeps your original business logic from final-details file.
+   ============================================================================ */
+
+(function(){
+    const errorEl = document.getElementById('error');
+    const detailsTable = document.getElementById('details');
+    const proceedBtn = document.getElementById('proceedBtn');
+    const topApplicant = document.getElementById('topApplicant');
+
+    function q(name){
+        return new URLSearchParams(window.location.search).get(name);
+    }
+
+    function showError(msg){
+        errorEl.style.display="block";
+        errorEl.textContent=msg;
+        detailsTable.style.display="none";
+    }
+
+    function hideError(){
+        errorEl.style.display="none";
+    }
+
+    function decideNextPage(data){
+        const income  = String(data['Income Document Submitted'] || '').toLowerCase() === 'yes';
+        const kyc     = String(data['KYC Submitted'] || '').toLowerCase() === 'yes';
+        const business= String(data['Business Proof Submitted'] || '').toLowerCase() === 'yes';
+
+        if(income && kyc && business) return 'success.html';
+        if(income && kyc) return 'business-proof.html';
+        if(income && !kyc) return 'kyc-submit.html';
+        return 'income-certificate.html';
+    }
+
+    function renderDetails(data){
+        hideError();
+        detailsTable.innerHTML="";
+
+        const fields = [
+            {key:"Applicant ID",label:"Applicant ID"},
+            {key:"Applicant's Industry",label:"Industry"},
+            {key:"Loan Amount Requested",label:"Loan Amount"},
+            {key:"Loan Category",label:"Loan Category"},
+            {key:"Applicant's Category",label:"Applicant Category"},
+            {key:"Income Document Submitted",label:"Income Submission"},
+            {key:"KYC Submitted",label:"KYC Submission"},
+            {key:"Business Proof Submitted",label:"Business Proof Submission"}
+        ];
+
+        fields.forEach(f=>{
+            const tr=document.createElement("tr");
+            const tdL=document.createElement("td");
+            tdL.className="label";
+            tdL.textContent=f.label;
+
+            const tdV=document.createElement("td");
+            let val = data[f.key] ?? "-";
+
+            if(f.key.includes("Submitted")){
+                const status = String(val).toLowerCase()==='yes' ? 
+                    '<span class="badge yes">Submitted</span>' : 
+                    '<span class="badge no">Pending</span>';
+                tdV.innerHTML = status;
+            } else {
+                tdV.textContent = val;
+            }
+
+            tr.appendChild(tdL);
+            tr.appendChild(tdV);
+            detailsTable.appendChild(tr);
+        });
+
+        detailsTable.style.display="";
+    }
+
+    async function loadApplicant(id){
+        try{
+            const resp = await fetch('/api/applicants/' + encodeURIComponent(id));
+            if(!resp.ok){
+                showError("Applicant not found.");
+                return;
+            }
+
+            const data = await resp.json();
+            topApplicant.textContent = "Applicant: " + id;
+
+            renderDetails(data);
+
+            const next = decideNextPage(data);
+            proceedBtn.style.display="block";
+            proceedBtn.onclick = ()=> window.location.href = next + "?id=" + encodeURIComponent(id);
+
+        }catch(e){
+            showError("Network error.");
+        }
+    }
+
+    const id = q("id") || localStorage.getItem("applicantId");
+
+    if(!id){
+        showError("No applicant specified.");
+        return;
+    }
+
+    localStorage.setItem("applicantId", id);
+
+    loadApplicant(id);
+
+    document.getElementById("backBtn").onclick = ()=>{
+        window.location.href = "/applicant-login.html";
+    };
+
+})();
+</script>
+
+</body>
+</html>

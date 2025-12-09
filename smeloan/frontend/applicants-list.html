@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applicants List - SME Loan</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: #eef3f9;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        .box {
+            width: 90%;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #0b4da2;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #0b4da2;
+            color: white;
+        }
+
+        .verify-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .verify-btn:hover {
+            background: #218838;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Applicants List</h2>
+        <table id="applicants-table">
+            <thead>
+                <tr>
+                    <th>Sl.No</th>
+                    <th>Applicant ID</th>
+                    <th>Industry</th>
+                    <th>Loan Amount Requested</th>
+                    <th>Loan Category</th>
+                    <th>Applicant's Category</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="applicants-body">
+                <!-- Data will be loaded here -->
+            </tbody>
+        </table>
+        <button class="back-btn" onclick="window.location.href='employee-dashboard.html'">Back to Dashboard</button>
+    </div>
+
+    <script>
+        async function loadApplicants() {
+            try {
+                const response = await fetch('/api/applicants');
+                const applicants = await response.json();
+                const tbody = document.getElementById('applicants-body');
+                tbody.innerHTML = '';
+                applicants.forEach(applicant => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${applicant['S.No.']}</td>
+                        <td>${applicant['Applicant ID']}</td>
+                        <td>${applicant['Applicant\'s Industry']}</td>
+                        <td>${applicant['Loan Amount Requested']}</td>
+                        <td>${applicant['Loan Category']}</td>
+                        <td>${applicant['Applicant\'s Category']}</td>
+                        <td><button class="verify-btn" onclick="verifyApplicant('${applicant['Applicant ID']}')">View</button></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading applicants:', error);
+            }
+        }
+
+        function verifyApplicant(id) {
+            window.location.href = `applicant-detail.html?id=${id}`;
+        }
+
+        loadApplicants();
+    </script>
+</body>
+</html>

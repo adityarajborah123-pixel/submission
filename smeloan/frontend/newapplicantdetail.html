@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Applicant Details - SME Loan</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: #eef3f9;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        .box {
+            width: 90%;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #0b4da2;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-section h3 {
+            color: #0b4da2;
+            margin-bottom: 10px;
+        }
+
+        .detail-item {
+            margin-bottom: 8px;
+        }
+
+        .detail-label {
+            font-weight: bold;
+        }
+
+        .documents-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .documents-table th, .documents-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .documents-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
+        .document-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .document-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>New Applicant Details</h2>
+        <div id="applicantDetails">
+            <!-- Applicant details will be populated here -->
+        </div>
+        <button class="back-btn" onclick="window.location.href='newapplicantlist.html'">Back to List</button>
+    </div>
+
+    <script>
+        async function loadApplicantDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const applicantId = urlParams.get('id');
+
+            if (!applicantId) {
+                document.getElementById('applicantDetails').innerHTML = '<p>No applicant ID provided.</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch('../backend/data/newapplicant.json');
+                const applicants = await response.json();
+                const applicant = applicants.find(app => app.applicantId === applicantId);
+
+                if (!applicant) {
+                    document.getElementById('applicantDetails').innerHTML = '<p>Applicant not found.</p>';
+                    return;
+                }
+
+                displayApplicantDetails(applicant);
+            } catch (error) {
+                console.error('Error loading applicant details:', error);
+                document.getElementById('applicantDetails').innerHTML = '<p>Failed to load applicant details.</p>';
+            }
+        }
+
+        function displayApplicantDetails(applicant) {
+            const detailsDiv = document.getElementById('applicantDetails');
+
+            let html = `
+                <div class="detail-section">
+                    <h3>Basic Information</h3>
+                    <div class="detail-item"><span class="detail-label">Serial Number:</span> ${applicant.slNo}</div>
+                    <div class="detail-item"><span class="detail-label">Company Name:</span> ${applicant.companyName}</div>
+                    <div class="detail-item"><span class="detail-label">Applicant ID:</span> ${applicant.applicantId}</div>
+                    <div class="detail-item"><span class="detail-label">Business Type:</span> ${applicant.businessType}</div>
+                    <div class="detail-item"><span class="detail-label">Phone Number:</span> ${applicant.phoneNumber}</div>
+                    <div class="detail-item"><span class="detail-label">Loan Amount:</span> ${applicant.loanAmount || 'N/A'}</div>
+                    <div class="detail-item"><span class="detail-label">Submission Date:</span> ${new Date(applicant.submissionDate).toLocaleString()}</div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Income Proof Documents</h3>
+                    <table class="documents-table">
+                        <thead>
+                            <tr>
+                                <th>Document Type</th>
+                                <th>File</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Profit & Loss Statement</td><td>${applicant.documents.incomeProof.profitLossStatement ? `<a class="document-link" href="../backend/uploads/${applicant.documents.incomeProof.profitLossStatement}" target="_blank">View</a>` : 'Not uploaded'}</td></tr>
+                            <tr><td>Balance Sheet</td><td>${applicant.documents.incomeProof.balanceSheet ? `<a class="document-link" href="../backend/uploads/${applicant.documents.incomeProof.balanceSheet}" target="_blank">View</a>` : 'Not uploaded'}</td></tr>
+                            <tr><td>Income Tax Return</td><td>${applicant.documents.incomeProof.incomeTaxReturn ? `<a class="document-link" href="../backend/uploads/${applicant.documents.incomeProof.incomeTaxReturn}" target="_blank">View</a>` : 'Not uploaded'}</td></tr>
+                            <tr><td>Bank Statement</td><td>${applicant.documents.incomeProof.bankStatement ? `<a class="document-link" href="../backend/uploads/${applicant.documents.incomeProof.bankStatement}" target="_blank">View</a>` : 'Not uploaded'}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="detail-section">
+                    <h3>KYC Documents</h3>
+                    <table class="documents-table">
+                        <thead>
+                            <tr>
+                                <th>Document Type</th>
+                                <th>File</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>PAN Card (Business)</td><td>${applicant.documents.kycDocuments.panCardBusiness ? `<a class="document-link" href="../backend/uploads/${applicant.documents.kycDocuments.panCardBusiness}" target="_blank">View</a>` : 'Not uploaded'}</td></tr>
+                            <tr><td>PAN Card (Owners)</td><td>${applicant.documents.kycDocuments.panCardOwners ? `<a class="document-link" href="../backend/uploads/${applicant.documents.kycDocuments.panCardOwners}" target="_blank">View</a>` : 'Not uploaded'}</td></tr>
+                            <tr><td>Aadhar Card</td><td>${applicant.documents.kycDocuments.aadharCard ? `<a class="document-link" href="../backend/uploads/${applicant.documents.kycDocuments.aadharCard}" target="_blank">View</a>` : 'Not uploaded'}</td></tr>
+                            <tr><td>Address Proof</td><td>${applicant.documents.kycDocuments.addressProof ? `<a class="document-link" href="../backend/uploads/${applicant.documents.kycDocuments.addressProof}" target="_blank">View</a>` : 'Not uploaded'}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="detail-section">
+                    <h3>Business Proof Documents</h3>
+                    <table class="documents-table">
+                        <thead>
+                            <tr>
+                                <th>Document Type</th>
+                                <th>File</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Registration Document</td><td>${applicant.documents.businessProof.registrationDocument ? `<a class="document-link" href="../backend/uploads/${applicant.documents.businessProof.registrationDocument}" target="_blank">View</a>` : 'Not uploaded'}</td></tr>
+                            <tr><td>Corporate ID</td><td>${applicant.documents.businessProof.corporateId ? `<a class="document-link" href="../backend/uploads/${applicant.documents.businessProof.corporateId}" target="_blank">View</a>` : 'Not uploaded'}</td></tr>
+                            <tr><td>Board of Directors</td><td>${applicant.documents.businessProof.boardOfDirectors ? `<a class="document-link" href="../backend/uploads/${applicant.documents.businessProof.boardOfDirectors}" target="_blank">View</a>` : 'Not uploaded'}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            detailsDiv.innerHTML = html;
+        }
+
+        window.onload = loadApplicantDetails;
+    </script>
+</body>
+</html>

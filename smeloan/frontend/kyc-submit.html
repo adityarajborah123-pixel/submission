@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>KYC Submission</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #eef2f7;
+    }
+
+    .top-bar {
+        background: #0b4da2;
+        color: white;
+        padding: 14px 30px;
+        font-size: 20px;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    .container {
+        width: 500px;
+        margin: 50px auto;
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        animation: fadeIn 0.4s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from {opacity:0; transform: translateY(10px);}
+        to   {opacity:1; transform: translateY(0);}
+    }
+
+    h2 {
+        margin-top: 0;
+        color: #0b4da2;
+        font-size: 26px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .subtext {
+        text-align: center;
+        font-size: 14px;
+        color: #444;
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        margin: 15px 0 6px;
+        font-weight: bold;
+        font-size: 14px;
+        color: #0b4da2;
+    }
+
+    input[type="text"], input[type="file"] {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #d0d0d0;
+        font-size: 15px;
+        background: #fafafa;
+    }
+
+    input[readonly] {
+        background: #e6e6e6;
+        cursor: not-allowed;
+    }
+
+    .file-box {
+        padding: 12px;
+        background: #fafafa;
+        border: 1px dashed #0b4da2;
+        border-radius: 10px;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+        margin-top: 20px;
+        background: #0b4da2;
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+</style>
+</head>
+
+<body>
+
+<div id="appHeader" style="background:#f3f6fb;padding:12px;border-bottom:1px solid #e1e8f0;font-weight:600;">
+  Loading applicant...
+</div>
+
+<div class="top-bar">KYC Verification Portal</div>
+
+<div class="container">
+
+    <h2>KYC Submission</h2>
+    <p class="subtext">Please upload the KYC details required for your SME loan process.</p>
+
+    <div id="msg"></div>
+
+    <form id="kycForm" autocomplete="off" enctype="multipart/form-data">
+      <input type="hidden" name="applicantId" id="kycAppId" value="">
+      <input type="hidden" name="section" value="kyc">
+
+      <label>PAN Card of Business</label>
+      <input type="file" name="pan_business" accept=".pdf">
+
+      <label>PAN Card(s) of Business Owner(s)</label>
+      <input type="file" name="pan_owner" accept=".pdf" multiple>
+
+      <label>Aadhar Card(s) of Business Owner(s)</label>
+      <input type="file" name="aadhar_owner" accept=".pdf" multiple>
+
+      <label>Business Address Proof</label>
+      <input type="file" name="address_proof" accept=".pdf">
+
+      <button type="submit">Submit KYC</button>
+    </form>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const header = document.getElementById('appHeader');
+  const idInput = document.getElementById('kycAppId');
+  const id = new URLSearchParams(window.location.search).get('id') || localStorage.getItem('applicantId') || '';
+
+  if (header) header.textContent = id ? 'Applicant ID: ' + id : 'Applicant ID: (missing)';
+  if (idInput && id) idInput.value = id;
+  if (!id) return;
+
+  try {
+    const res = await fetch('/api/applicants/' + encodeURIComponent(id));
+    if (res.ok) {
+      const data = await res.json();
+      const name = data['Applicant Name'] || data.name || data['Business Name'] || '';
+      if (name && header) header.textContent = `Applicant ID: ${id} — ${name}`;
+    }
+  } catch (e) { /* ignore */ }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const id = new URLSearchParams(location.search).get('id') || localStorage.getItem('applicantId') || '';
+  if (id) document.getElementById('kycAppId').value = id;
+  document.getElementById('kycForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (!validateFiles()) {
+      return; // Stop submission if validation fails
+    }
+
+    const fd = new FormData(e.target);
+    const res = await fetch('/api/applicants/' + encodeURIComponent(id) + '/submit-doc', { method:'POST', body: fd });
+    if (res.ok) { localStorage.setItem('applicantId', id); location.href='business-proof.html?id='+encodeURIComponent(id); } else alert('Save failed');
+  });
+});
+
+// Validate file uploads
+function validateFiles() {
+  const fileInputs = document.querySelectorAll('input[type="file"]');
+  const maxSize = 5 * 1024 * 1024; // 5 MB in bytes
+  let isValid = true;
+  let errorMessage = '';
+
+  fileInputs.forEach(input => {
+    if (input.files.length > 0) {
+      for (let file of input.files) {
+        // Check file type
+        if (file.type !== 'application/pdf') {
+          isValid = false;
+          errorMessage += `${file.name} must be a PDF file.\n`;
+        }
+        // Check file size
+        if (file.size > maxSize) {
+          isValid = false;
+          errorMessage += `${file.name} exceeds 5 MB limit.\n`;
+        }
+      }
+    }
+  });
+
+  if (!isValid) {
+    alert('Validation Error:\n' + errorMessage);
+  }
+
+  return isValid;
+}
+
+
+</script>
+
+</body>
+</html>
